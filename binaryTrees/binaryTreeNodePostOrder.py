@@ -1,21 +1,27 @@
 # Implementation Of Binary Tree
 # Implementation of Binary Tree Node
-
+# By Francisco Eduardo Balart Sanchez
+# http://www.codeskulptor.org/#user42_rTHaZaNUvesxdqa_20.py
 import math
 import random
 
-tree =["A","B","C","E","F","G","H","L","","","","I","J","","","","","","","","D","M","","",""]
+tree =["A","B","C","E","F","G","H","L","","I","J","","","","D","","","","","","","M","","",""]
+
+#tree =["A","B","C","E","F","G","H","L","","I","J","","","","D","","","","","","","","","","","","","","","M",""]
+#       |   |_v_|   |_____V_____|   |____________V__________|  |_______________________v______________________|
+#    2^0=1   2^1=4     2^2=4                   2^3 = 8                                2^4 = 16
 #
-#							A
-#					       / \
-#						  B   C
-#                        /\   /\
-#                       E  F G  H
-#                      /  /\      \
-#                      L I  J      D
-#        						   /
-#								  M
-#
+#							  A             -----1
+#					       /     \          
+#						  B       C         -----2
+#                        /  \     / \
+#                       E    F   G    H     -----4
+#                      / \   /\  /\   / \
+#                      L  @ I J  @@   @  D   -----8
+#        			  /\    /\/\         /\
+#					 @ @    @@@@         M @ -----16
+#										 /\
+#										 @@
 
 class BinaryTree:
     """
@@ -24,57 +30,67 @@ class BinaryTree:
     def __init__(self, file):
         self._nodes = []
         self._postOrderPath = []
-        self.createTree(self._nodes, file)
+        self.createTree(file)
     def __str__(self):
         return "Class Binary Tree: \n"  \
               +"With nodes: "+str(self._nodes)+"\n"
-    def createTree(self, nodes, file):
+    def createTree(self, file):
         queue = []
-        queue.append(file.pop(0))
-        while queue!=[]:
+        queue.append(BinaryTreeNode(file.pop(0)))
+        while queue!=[]:            
             currentNode = queue.pop(0)
-            if currentNode == None:
-                continue
-            #print currentNode
-            #print file
             left = file.pop(0)
-            if left == "":
-                left = None
-            queue.append(left)
+            if (left == ""):
+                left = BinaryTreeNode(None)
+            else:
+                left = BinaryTreeNode(left)
+                queue.append(left)
             right = file.pop(0)
-            if right == "":
-                right = None
-            queue.append(right)
-            node = BinaryTreeNode(currentNode,left,right)
-            self._nodes.append(node)
-    def travelPostOrder(self):
-        currentNode = self._nodes.pop(0)
-        self._postOrderPath.append(currentNode)
-        queue = []
-        queue.append(currentNode)
-        while queue != []:
-            currentNode = queue.pop(0)
-            print "current Node\n"+str(currentNode)
-            for nodes in currentNode.getChilds():
-                queue.append(nodes)
-                self._postOrderPath.append(nodes)
-                
-        return reverse(self._postOrderPath)
-                
-            
-        #for child in self.nodes:
-            
+            if (right == ""):
+                right = BinaryTreeNode(None)
+            else:
+                right = BinaryTreeNode(right)
+                queue.append(right)
+            if (len(self._nodes) !=0):
+                found = False
+                for node in self._nodes:
+                    if currentNode._value == node._value:
+                        node._leftChild = left
+                        node._rightChild = right
+                        found = True
+                if (found == False):
+                    currentNode._leftChild = left
+                    currentNode._rightChild = right
+                    self._nodes.append(currentNode)
+                    if left._value != None:
+                        self._nodes.append(left)
+                    if right._value != None:
+                        self._nodes.append(right)
+            elif (len(self._nodes) ==0):
+                currentNode._leftChild = left
+                currentNode._rightChild = right
+                self._nodes.append(currentNode)
+                if left._value != None:
+                    self._nodes.append(left)
+                if right._value != None:
+                    self._nodes.append(right)
+    def travelPostOrder(self, node ):
+        currentNode = node
+        if currentNode._value != None:
+            self.travelPostOrder(currentNode._leftChild)
+            self.travelPostOrder(currentNode._rightChild)
+            self._postOrderPath.insert(0,currentNode._value)
+        return self._postOrderPath
         
 class BinaryTreeNode:
     """
     Simple Binary Tree Node Class.
     """
-    def __init__(self, value, left, right):
+    def __init__(self, value, left=None, right=None):
         self._value = value
         self._leftChild = left
         self._rightChild = right
         self._visited = False
-
     def __str__(self):
         """
         Return human readable state
@@ -96,11 +112,14 @@ class BinaryTreeNode:
     def unvisited(self):
         self._visited = False
         
+print "The tree length "+str(len(tree))+"\n"        
 AbinaryTree = BinaryTree(tree)
-#for node in AbinaryTree._nodes:
-#    print node
-PostOrder =     AbinaryTree.travelPostOrder()
-for node in PostOrder:
-    print node._value
-    
-    
+print "The tree Nodes \n"
+print [node._value for node in AbinaryTree._nodes]
+for node in AbinaryTree._nodes:
+    print "\nnode value: "+str(node._value)
+    print "left: "+str(node._leftChild._value)
+    print "right: "+str(node._rightChild._value)
+PostOrder = AbinaryTree.travelPostOrder(AbinaryTree._nodes[0])
+print "\nPost Order traversal\n"
+print [node for node in PostOrder]
